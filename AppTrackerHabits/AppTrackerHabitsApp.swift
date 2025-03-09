@@ -1,10 +1,3 @@
-//
-//  AppTrackerHabitsApp.swift
-//  AppTrackerHabits
-//
-//  Created by alex  on 2025-03-07.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -13,6 +6,8 @@ struct AppTrackerHabitsApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
+            Character.self,
+            Stat.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
