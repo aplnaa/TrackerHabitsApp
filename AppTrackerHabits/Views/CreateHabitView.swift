@@ -2,16 +2,20 @@ import SwiftUI
 
 struct CreateHabitView: View {
     @Binding var isPresented: Bool
+    var onHabitCreated: (Habit) -> Void
+    
     @State private var habitName = "Утренняя пробежка"
     @State private var selectedCategory = 0
     @State private var selectedDays: [Bool] = [true, true, true, true, true, false, false]
     @State private var reminderTime = Date()
     @State private var dailyGoal = ""
     @State private var notificationsEnabled = true
+    @State private var selectedIcon = "🏃"
     @State private var showTimePicker = false
     
     private let categories = ["Здоровье", "Развитие", "Работа"]
     private let weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+    private let icons = ["🏃", "💧", "📚", "🧘", "💻", "📝", "🎯", "🎸", "🧠", "🍎"]
     
     var body: some View {
         ZStack {
@@ -43,6 +47,33 @@ struct CreateHabitView: View {
                         .padding(.trailing, 20)
                     }
                     
+                    // Выбор иконки
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Иконка")
+                            .font(.headline)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(icons, id: \.self) { icon in
+                                    Button(action: {
+                                        selectedIcon = icon
+                                    }) {
+                                        Text(icon)
+                                            .font(.system(size: 24))
+                                            .frame(width: 50, height: 50)
+                                            .background(selectedIcon == icon ? AppColors.chosen : Color.white)
+                                            .foregroundColor(selectedIcon == icon ? .white : .black)
+                                            .clipShape(Circle())
+                                            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 15)
+                    
                     // Форма создания привычки
                     VStack(alignment: .leading, spacing: 20) {
                         // Название
@@ -57,7 +88,6 @@ struct CreateHabitView: View {
                                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                         }
                         .padding(.horizontal)
-                        .padding(.top, 15)
                         
                         // Категория
                         VStack(alignment: .leading, spacing: 10) {
@@ -170,7 +200,7 @@ struct CreateHabitView: View {
                         
                         // Кнопка создания
                         Button(action: {
-                            // Создание привычки
+                            createHabit()
                             isPresented = false
                         }) {
                             Text("Создать")
@@ -197,5 +227,24 @@ struct CreateHabitView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "hh:mm a"
         return formatter
+    }
+    
+    private func createHabit() {
+        // Создание новой привычки из данных формы
+        let newHabit = Habit(
+            name: habitName,
+            description: dailyGoal.isEmpty ? "Новая привычка" : dailyGoal,
+            icon: selectedIcon,
+            category: categories[selectedCategory],
+            progress: 0.0,
+            completed: false,
+            scheduledDays: selectedDays,
+            reminderTime: reminderTime,
+            dailyGoal: dailyGoal,
+            notificationsEnabled: notificationsEnabled
+        )
+        
+        // Вызываем коллбэк для создания привычки
+        onHabitCreated(newHabit)
     }
 }
