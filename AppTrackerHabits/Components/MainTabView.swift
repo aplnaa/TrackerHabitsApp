@@ -1,9 +1,12 @@
 import SwiftUI
 
+import SwiftUI
+
 struct MainTabView: View {
     var character: Character
     @State private var selectedTab = 0
     @State private var showCreateHabit = false
+    @StateObject private var habitsViewModel = ViewModelFactory.shared.makeHabitsViewModel()
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -11,7 +14,8 @@ struct MainTabView: View {
                 CharacterView(character: character)
                     .tag(0)
                 
-                HabitsView()
+                // Используем обновленный HabitsView с ViewModel
+                HabitsView(viewModel: habitsViewModel)
                     .tag(1)
                 
                 // Пустой вид для кнопки добавления
@@ -33,8 +37,15 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $showCreateHabit) {
-            CreateHabitView(isPresented: $showCreateHabit)
-                .background(AppColors.background)
+            CreateHabitView(
+                isPresented: $showCreateHabit,
+                onHabitCreated: { habit in
+                    Task {
+                        await habitsViewModel.createHabit(habit: habit)
+                    }
+                }
+            )
+            .background(AppColors.background)
         }
     }
 }
